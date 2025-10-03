@@ -1,0 +1,8 @@
+# This workflow is disabled. See android-ci.yml for the active CI workflow.
+# The original workflow tried to build release APKs which require keystore secrets.
+# For CI purposes, we build debug APKs which don't require signing.
+
+# Uncomment and configure the workflow below if you want to build release APKs:
+# 1. Add keystore file as base64 encoded secret: KEYSTORE_BASE64  
+# 2. Add keystore credentials as secrets: KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD
+# 3. Add target repository access token: TARGET_REPO_ACCESS_TOKEN

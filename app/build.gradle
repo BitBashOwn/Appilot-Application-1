@@ -32,20 +32,27 @@ android {
         versionCode getVersionC()
         versionName getVersionN()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField "String", "API_KEY", '\"' + project.properties["API_KEY"] + '\"'
+        // buildConfigField "String", "API_KEY", '\"' + project.properties["API_KEY"] + '\"'
     }
 
     signingConfigs {
         release {
-            storeFile file("../gradle/release.keystore")
-            storePassword System.getenv("KEYSTORE_PASSWORD")
-            keyAlias System.getenv("KEY_ALIAS")
-            keyPassword System.getenv("KEY_PASSWORD")
+            def keystoreFile = file("../gradle/release.keystore")
+            if (keystoreFile.exists()) {
+                storeFile keystoreFile
+                storePassword System.getenv("KEYSTORE_PASSWORD")
+                keyAlias System.getenv("KEY_ALIAS")
+                keyPassword System.getenv("KEY_PASSWORD")
+            }
         }
     }
     buildTypes {
         release {
-            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (signingConfigs.release.storeFile?.exists()) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 

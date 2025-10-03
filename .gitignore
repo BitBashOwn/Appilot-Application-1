@@ -80,5 +80,8 @@ coverage/
 # Ignore generated files in .github workflows
 .github/workflows/*.log
 
+# Disable problematic workflow files
+.github/workflows/androidBuild.yml
+
 # Ignore migration agent files
 .idea/copilot.data.migration.*
