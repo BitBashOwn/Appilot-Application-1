@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/login_gradient_bg">
+
+    <!-- Success Card Container remains unchanged -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        app:cardBackgroundColor="#EAFDFBFB"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Inner layout remains unchanged -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/AllSetContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="32dp">
+
+            <ImageView
+                android:id="@+id/tickIcon"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:contentDescription="@string/setup_complete"
+                android:src="@drawable/ic_green_tick"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/setupText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/you_re_all_set"
+                android:textColor="@android:color/black"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tickIcon" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Status Container -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/statusContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Web App Connection Status -->
+        <TextView
+            android:id="@+id/lastUpdatedTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="Web App Connection:"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/webAppStatusLight"
+            app:layout_constraintEnd_toStartOf="@+id/webAppStatusLight"
+            app:layout_constraintTop_toTopOf="@+id/webAppStatusLight" />
+
+        <ImageView
+            android:id="@+id/webAppStatusLight"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="Web app connection status indicator"
+            android:src="@drawable/ic_light_red"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Accessibility Service Status -->
+
+        <TextView
+            android:id="@+id/accessibilityStatusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:text="Accessibility Service:"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/accessibilityStatusLight"
+            app:layout_constraintEnd_toStartOf="@+id/accessibilityStatusLight"
+            app:layout_constraintTop_toTopOf="@+id/accessibilityStatusLight"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <ImageView
+            android:id="@+id/accessibilityStatusLight"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="Accessibility service status indicator"
+            android:src="@drawable/ic_light_red"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/webAppStatusLight"
+            android:layout_marginTop="16dp" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- APK Version Text -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/versionContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/versionLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Version: "
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1.2.3"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium"
+            app:layout_constraintStart_toEndOf="@id/versionLabel"
+            app:layout_constraintBaseline_toBaselineOf="@id/versionLabel" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

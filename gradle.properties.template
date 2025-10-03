@@ -1,0 +1,8 @@
+# Copy this file to gradle.properties and add your actual values
+# DO NOT commit gradle.properties with real credentials to version control
+
+# Keystore credentials (for release builds)
+# These should be set as environment variables or in local gradle.properties
+KEYSTORE_PASSWORD=your_keystore_password
+KEY_ALIAS=your_key_alias
+KEY_PASSWORD=your_key_password

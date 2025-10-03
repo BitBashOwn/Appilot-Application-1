@@ -1,0 +1,73 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+def getVersionC() {
+    def versionFile = file("version.properties")
+    if (!versionFile.exists()) {
+        versionFile.write("VERSION_CODE=1\n")
+    }
+    def properties = new Properties()
+    versionFile.withReader { reader -> properties.load(reader) }
+
+    int newVersionCode = (properties.getProperty("VERSION_CODE")?.toInteger() ?: 1) + 1
+    properties.setProperty("VERSION_CODE", newVersionCode.toString())
+
+    versionFile.withWriter { writer -> properties.store(writer, null) }
+    return newVersionCode
+}
+
+def getVersionN() {
+    return System.getenv("VERSION_NAME") ?: "v1.0.0"
+}
+
+android {
+    namespace "com.example.appilot"
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.example.appilot"
+        minSdk 30
+        targetSdk 34
+        versionCode getVersionC()
+        versionName getVersionN()
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "API_KEY", '\"' + project.properties["API_KEY"] + '\"'
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("../gradle/release.keystore")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+}
+
+dependencies {
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.activity
+    implementation libs.constraintlayout
+    implementation libs.okhttp
+
+    // Testing dependencies
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+}

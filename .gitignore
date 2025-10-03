@@ -1,0 +1,84 @@
+# Gradle & build system
+.gradle/
+build/
+app/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Local configuration
+local.properties
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# External native build
+.externalNativeBuild/
+.cxx/
+
+# Android Studio
+captures/
+app/.idea/
+app/.idea/caches/
+app/.idea/libraries/
+app/.idea/modules.xml
+app/.idea/workspace.xml
+app/.idea/navEditor.xml
+app/.idea/assetWizardSettings.xml
+
+# Release artifacts
+app/release/
+*.apk
+*.ap_
+*.aab
+
+# Keystore files
+*.keystore
+*.jks
+gradle/release.keystore
+gradle/release.keystore.base64
+
+# Reports
+build/reports/
+app/build/reports/
+
+# Build configuration with sensitive data (CRITICAL!)
+# Only ignore gradle.properties if it contains sensitive data like keystore credentials
+# Current gradle.properties is safe to commit (contains only standard settings)
+# gradle.properties
+gradle.properties.local
+secrets.properties
+app/src/main/res/values/secrets.xml
+
+# Auto-generated version files
+app/version.properties
+
+# Build config and generated files
+/gen
+/out
+*.dex
+*.class
+
+# Test outputs
+test-output/
+coverage/
+
+# Backup and temporary files
+*.bak
+*.tmp
+*.swp
+*~
+
+# Misc
+*.log
+
+# Ignore generated files in .github workflows
+.github/workflows/*.log
+
+# Ignore migration agent files
+.idea/copilot.data.migration.*

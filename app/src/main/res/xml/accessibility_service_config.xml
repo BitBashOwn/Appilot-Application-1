@@ -1,0 +1,28 @@
+<!--<accessibility-service-->
+<!--    xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    android:accessibilityEventTypes="typeAllMask"-->
+<!--    android:packageNames="com.example.appilot,com.reddit.frontpage"-->
+<!--    android:accessibilityFeedbackType="feedbackSpoken"-->
+<!--    android:notificationTimeout="100"-->
+<!--    android:accessibilityFlags="flagDefault|flagIncludeNotImportantViews|flagReportViewIds"-->
+<!--    android:canRetrieveWindowContent="true"-->
+<!--    android:canRequestEnhancedWebAccessibility="true"-->
+<!--    android:canRequestFilterKeyEvents="true"-->
+<!--    android:canPerformGestures="true"-->
+<!--    android:canRequestTouchExplorationMode="true"-->
+<!--    android:settingsActivity="com.example.appilot.MainActivity" />-->
+
+<accessibility-service
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeAllMask"
+    android:packageNames="com.example.appilot,com.reddit.frontpage,com.instagram.android,com.linkedin.android,com.zhiliaoapp.musically,com.twitter.android"
+    android:accessibilityFeedbackType="feedbackSpoken"
+    android:notificationTimeout="100"
+    android:accessibilityFlags="flagDefault|flagIncludeNotImportantViews|flagReportViewIds"
+    android:canRetrieveWindowContent="true"
+    android:canRequestEnhancedWebAccessibility="true"
+    android:canRequestFilterKeyEvents="true"
+    android:canPerformGestures="true"
+    android:canRequestTouchExplorationMode="true"
+    android:settingsActivity="com.example.appilot.MainActivity" />
+

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">80.211.121.8</domain>
+        <domain includeSubdomains="true">server.appilot.app</domain>
+        <domain includeSubdomains="true">legaitech.xyz</domain>
+        <domain includeSubdomains="true">192.168.0.112</domain>
+        <domain includeSubdomains="true">192.168.1.109</domain>
+        <domain includeSubdomains="true">192.168.1.11</domain>
+        <domain includeSubdomains="true">192.168.1.31</domain>
+        <trust-anchors>
+            <!-- Trust system CA certificates -->
+            <certificates src="system" />
+            <certificates src="user" />
+            <!-- Uncomment below if you have a self-signed certificate -->
+            <!-- <certificates src="@raw/legaitech_cert" /> -->
+        </trust-anchors>
+    </domain-config>
+</network-security-config>
