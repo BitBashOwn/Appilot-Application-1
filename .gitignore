@@ -80,7 +80,7 @@ coverage/
 # Ignore generated files in .github workflows
 .github/workflows/*.log
 
-# Disable problematic workflow files
+# Disable problematic workflow file to prevent permission issues
 .github/workflows/androidBuild.yml
 
 # Ignore migration agent files
