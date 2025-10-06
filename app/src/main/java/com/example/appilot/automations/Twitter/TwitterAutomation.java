@@ -49,17 +49,20 @@ public class TwitterAutomation {
     private boolean commentsOnTweets;
     private boolean userNameInteract;
     private boolean spaces;
+    private boolean newPost;
     private boolean API;
     private String dateLike;
     private String dateFollow;
     private String dateComment;
     private String spaceLink;
+    private String newPostPrompt;
     private String API_key;
     private LikeTweets likeTweets;
     private Follow follow;
     private TweetComments tweetComments;
     private InteractionWithUsernames UserNameInteract;
     private JoinSpaces joinspaces;
+    private PostTweet postTweet;
     public TwitterAutomation(MyAccessibilityService service, String taskid, String jobid, List<Object> AccountInputs, int duration) {
         this.context = service;
         this.service = service;
@@ -331,6 +334,16 @@ public class TwitterAutomation {
                                             Log.d(TAG, "✓ Space Link: " + spaceLink);
                                         }
                                     }
+
+                                    if (connectionObject.has("Post a new Tweet")) {
+                                        newPost = connectionObject.optBoolean("Post a new Tweet", false);
+                                        Log.d(TAG, "✓ Post a new Tweet: " + newPost);
+
+                                        if (newPost && connectionObject.has("prompt")) {
+                                            newPostPrompt = connectionObject.optString("prompt", "");
+                                            Log.d(TAG, "✓ Post Prompt: " + newPostPrompt);
+                                        }
+                                    }
                                 }
                             } else {
                                 Log.e(TAG, "TikTok key found but value is not an array");
@@ -367,6 +380,8 @@ public class TwitterAutomation {
             Log.d(TAG, "Number of Profiles: " + numberofProfiles);
             Log.d(TAG, "Join the Twitter Space: " + spaces);
             Log.d(TAG, "Space URL: " + spaceLink);
+            Log.d(TAG, "Post a new Tweet.: " + newPost);
+            Log.d(TAG, "New Post Prompt: " + newPostPrompt);
             Log.d(TAG, "Duration: " + duration);
             Log.d(TAG, "=====================================");
 
@@ -376,6 +391,7 @@ public class TwitterAutomation {
             this.tweetComments = new TweetComments(service, Task_id, job_id, AccountInputs, duration, probability_comment, API_key, limit_comment, dateComment);
             this.UserNameInteract = new InteractionWithUsernames(service, Task_id, job_id, AccountInputs, duration, postedArray, numberofProfiles, API_key);
             this.joinspaces = new JoinSpaces(service, Task_id, job_id, AccountInputs, duration, spaceLink);
+            this.postTweet = new PostTweet(service, Task_id, job_id, AccountInputs, duration, newPostPrompt, API_key);
 //            // Route to the appropriate function based on toggle states
 //            if (API && likeTweet) {
 //                Log.d(TAG, "🎯 Routing to: Like Tweets Only");
@@ -434,12 +450,14 @@ public class TwitterAutomation {
         } else if (API && userNameInteract) {
             Log.d(TAG, "🎯 Routing to: Interaction with profiles using usernames");
             UserNameInteract.startInteractAutomation();
+        } else if (API && newPost) {
+            Log.d(TAG, "🎯 Routing to: Post a new Tweet.");
+            postTweet.startPostingAutomation();
         } else {
             Log.d(TAG, "🎯 No automation selected - Using default: ReelLiker");
             helperFunctions.cleanupAndExit("Doesn't find any automation", "error");
         }
     }
-
 
 
 //    Helper Function
