@@ -31,11 +31,32 @@ public class OpenAIClient {
     public void generateComment(String originalComment, String commentType, int promptNum, OpenAICallback callback) {
         if (promptNum == 1) {
             // Create the prompt for generating a relevant comment
-            prompt = "Generate a " + commentType + ", short, engaging reply to this Twitter comment (maximum 280 characters, preferably 50-100 characters). " +
-                    "Make it sound natural and conversational. Original comment: \"" + originalComment + "\"";
+            prompt = "You are a witty, engaging Twitter user who replies naturally to tweets. " +
+                    "Read the following tweet carefully and write a short, context-aware " + commentType +
+                    " that feels authentic, friendly, and human. " +
+                    "Keep it concise (max 280 characters, ideally 50–120). " +
+                    "Match the tone of the tweet — if it’s funny, be witty; if it’s serious, be thoughtful. " +
+                    "Avoid emojis unless they fit naturally. " +
+                    "Original tweet: \"" + originalComment + "\"";
         } else if (promptNum == 2) {
-            prompt = "Generate a short, engaging quote tweet (maximum 280 characters, preferably 50-80 characters) in response to the following tweet. " +
-                    "Make it sound natural, conversational, and relevant to the original tweet. Original tweet: \"" + originalComment + "\"";
+            prompt = "You are crafting a natural and engaging quote tweet for a repost. " +
+                    "Read the original tweet carefully and write a short (50–100 characters) quote that feels authentic, conversational, and relevant to its message. " +
+                    "Match the tone of the tweet — if it’s funny, reply with wit; if it’s inspiring, echo positivity; if it’s newsy, react thoughtfully. " +
+                    "Avoid forced hashtags or emojis unless they fit perfectly. " +
+                    "Original tweet: \"" + originalComment + "\"";
+        } else if (promptNum == 3) {
+            prompt = "You are a social media expert crafting tweets that sound natural, engaging, and human. " +
+                            "Read the following user-provided context carefully — it includes the idea or topic of the tweet, along with any hashtags or mentions that must stay in the final version. " +
+                            "Using that context, write a new, well-structured tweet (max 280 characters) that: " +
+                            "1. Clearly conveys the user's intended message or emotion, " +
+                            "2. Keeps a conversational and authentic tone (not overly promotional), " +
+                            "3. Naturally includes all provided hashtags and mentions, " +
+                            "4. Feels like something a real person would post on Twitter/X. " +
+                            "Do not add extra hashtags or mentions beyond what is provided. " +
+                            "User context: \"" + originalComment + "\"";
+        } else {
+            callback.onError("Invalid prompt number");
+            return;
         }
         JSONObject requestBody = new JSONObject();
         try {
