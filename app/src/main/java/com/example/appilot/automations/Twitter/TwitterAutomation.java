@@ -36,6 +36,7 @@ public class TwitterAutomation {
     private String job_id = null;
     private List<Object> AccountInputs;
     private JSONArray postedArray;
+    private JSONArray tweetsArray;
     private int duration;
     private double probability_like;
     private double probability_follow;
@@ -44,18 +45,23 @@ public class TwitterAutomation {
     private int limit_follow;
     private int limit_comment;
     private int numberofProfiles;
+    private int numberofTweets;
     private boolean likeTweet;
     private boolean followTweet;
     private boolean commentsOnTweets;
     private boolean userNameInteract;
     private boolean spaces;
     private boolean newPost;
+    private boolean Follow_Unfollow;
+    private boolean specificTweets;
     private boolean API;
     private String dateLike;
     private String dateFollow;
     private String dateComment;
     private String spaceLink;
     private String newPostPrompt;
+    private String profile;
+    private String typeofAction;
     private String API_key;
     private LikeTweets likeTweets;
     private Follow follow;
@@ -63,6 +69,8 @@ public class TwitterAutomation {
     private InteractionWithUsernames UserNameInteract;
     private JoinSpaces joinspaces;
     private PostTweet postTweet;
+    private Follow_Unfollow follow_unfollow;
+    private Retweet retweet;
     public TwitterAutomation(MyAccessibilityService service, String taskid, String jobid, List<Object> AccountInputs, int duration) {
         this.context = service;
         this.service = service;
@@ -254,62 +262,62 @@ public class TwitterAutomation {
                                         }
                                     }
 
-                                    if (connectionObject.has("Like the Tweets")) {
-                                        likeTweet = connectionObject.optBoolean("Like the Tweets", false);
-                                        Log.d(TAG, "✓ Like the Tweets: " + likeTweet);
-
-                                        if (likeTweet && connectionObject.has("probability")) {
-                                            int numberOfConnections = connectionObject.optInt("probability", 0);
-                                            probability_like = numberOfConnections / 100.0;
-                                            Log.d(TAG, "✓ Probability: " + probability_like);
-                                        }
-                                        if (likeTweet && connectionObject.has("tweetsPerDay")) {
-                                            limit_like = connectionObject.optInt("tweetsPerDay", 0);
-                                            Log.d(TAG, "✓ tweetsPerDay: " + limit_like);
-                                        }
-                                        if (connectionObject.has("date")) {
-                                            dateLike = connectionObject.optString("date", "");
-                                            Log.d(TAG, "✓ Date for Like the Tweets: " + dateLike);
-                                        }
-                                    }
-
-                                    if (connectionObject.has("Follow the Users")) {
-                                        followTweet = connectionObject.optBoolean("Follow the Users", false);
-                                        Log.d(TAG, "✓ Follow the Users: " + followTweet);
-
-                                        if (followTweet && connectionObject.has("probability")) {
-                                            int numberOfConnections = connectionObject.optInt("probability", 0);
-                                            probability_follow = numberOfConnections / 100.0;
-                                            Log.d(TAG, "✓ Probability: " + probability_follow);
-                                        }
-                                        if (followTweet && connectionObject.has("tweetsPerDay")) {
-                                            limit_follow = connectionObject.optInt("tweetsPerDay", 0);
-                                            Log.d(TAG, "✓ tweetsPerDay: " + limit_follow);
-                                        }
-                                        if (connectionObject.has("date")) {
-                                            dateFollow = connectionObject.optString("date", "");
-                                            Log.d(TAG, "✓ Date for Follow the Users: " + dateFollow);
-                                        }
-                                    }
-
-                                    if (connectionObject.has("Comment on Tweets")) {
-                                        commentsOnTweets = connectionObject.optBoolean("Comment on Tweets", false);
-                                        Log.d(TAG, "✓ Comment on Tweets: " + commentsOnTweets);
-
-                                        if (commentsOnTweets && connectionObject.has("probability")) {
-                                            int numberOfConnections = connectionObject.optInt("probability", 0);
-                                            probability_comment = numberOfConnections / 100.0;
-                                            Log.d(TAG, "✓ Probability: " + probability_comment);
-                                        }
-                                        if (commentsOnTweets && connectionObject.has("tweetsPerDay")) {
-                                            limit_comment = connectionObject.optInt("tweetsPerDay", 0);
-                                            Log.d(TAG, "✓ tweetsPerDay: " + limit_comment);
-                                        }
-                                        if (connectionObject.has("date")) {
-                                            dateComment = connectionObject.optString("date", "");
-                                            Log.d(TAG, "✓ Date for Comments on Tweets: " + dateComment);
-                                        }
-                                    }
+//                                    if (connectionObject.has("Like the Tweets")) {
+//                                        likeTweet = connectionObject.optBoolean("Like the Tweets", false);
+//                                        Log.d(TAG, "✓ Like the Tweets: " + likeTweet);
+//
+//                                        if (likeTweet && connectionObject.has("probability")) {
+//                                            int numberOfConnections = connectionObject.optInt("probability", 0);
+//                                            probability_like = numberOfConnections / 100.0;
+//                                            Log.d(TAG, "✓ Probability: " + probability_like);
+//                                        }
+//                                        if (likeTweet && connectionObject.has("tweetsPerDay")) {
+//                                            limit_like = connectionObject.optInt("tweetsPerDay", 0);
+//                                            Log.d(TAG, "✓ tweetsPerDay: " + limit_like);
+//                                        }
+//                                        if (connectionObject.has("date")) {
+//                                            dateLike = connectionObject.optString("date", "");
+//                                            Log.d(TAG, "✓ Date for Like the Tweets: " + dateLike);
+//                                        }
+//                                    }
+//
+//                                    if (connectionObject.has("Follow the Users")) {
+//                                        followTweet = connectionObject.optBoolean("Follow the Users", false);
+//                                        Log.d(TAG, "✓ Follow the Users: " + followTweet);
+//
+//                                        if (followTweet && connectionObject.has("probability")) {
+//                                            int numberOfConnections = connectionObject.optInt("probability", 0);
+//                                            probability_follow = numberOfConnections / 100.0;
+//                                            Log.d(TAG, "✓ Probability: " + probability_follow);
+//                                        }
+//                                        if (followTweet && connectionObject.has("tweetsPerDay")) {
+//                                            limit_follow = connectionObject.optInt("tweetsPerDay", 0);
+//                                            Log.d(TAG, "✓ tweetsPerDay: " + limit_follow);
+//                                        }
+//                                        if (connectionObject.has("date")) {
+//                                            dateFollow = connectionObject.optString("date", "");
+//                                            Log.d(TAG, "✓ Date for Follow the Users: " + dateFollow);
+//                                        }
+//                                    }
+//
+//                                    if (connectionObject.has("Comment on Tweets")) {
+//                                        commentsOnTweets = connectionObject.optBoolean("Comment on Tweets", false);
+//                                        Log.d(TAG, "✓ Comment on Tweets: " + commentsOnTweets);
+//
+//                                        if (commentsOnTweets && connectionObject.has("probability")) {
+//                                            int numberOfConnections = connectionObject.optInt("probability", 0);
+//                                            probability_comment = numberOfConnections / 100.0;
+//                                            Log.d(TAG, "✓ Probability: " + probability_comment);
+//                                        }
+//                                        if (commentsOnTweets && connectionObject.has("tweetsPerDay")) {
+//                                            limit_comment = connectionObject.optInt("tweetsPerDay", 0);
+//                                            Log.d(TAG, "✓ tweetsPerDay: " + limit_comment);
+//                                        }
+//                                        if (connectionObject.has("date")) {
+//                                            dateComment = connectionObject.optString("date", "");
+//                                            Log.d(TAG, "✓ Date for Comments on Tweets: " + dateComment);
+//                                        }
+//                                    }
 
                                     if (connectionObject.has("Profile interaction using Usernames")) {
                                         userNameInteract = connectionObject.optBoolean("Profile interaction using Usernames", false);
@@ -344,6 +352,34 @@ public class TwitterAutomation {
                                             Log.d(TAG, "✓ Post Prompt: " + newPostPrompt);
                                         }
                                     }
+
+                                    if (connectionObject.has("Follow/Unfollow the Usernames")) {
+                                        Follow_Unfollow = connectionObject.optBoolean("Follow/Unfollow the Usernames", false);
+                                        Log.d(TAG, "✓ Follow/Unfollow the Usernames: " + Follow_Unfollow);
+
+                                        if (Follow_Unfollow && connectionObject.has("usernames")) {
+                                            profile = connectionObject.optString("usernames", "");
+                                            Log.d(TAG, "✓ Usernames: " + profile);
+                                        }
+                                        if (Follow_Unfollow && connectionObject.has("followAction")) {
+                                            typeofAction = connectionObject.optString("followAction", "");
+                                            Log.d(TAG, "✓ Type of Action: " + typeofAction);
+                                        }
+                                    }
+
+                                    if (connectionObject.has("Interact with specific Tweets")) {
+                                        specificTweets = connectionObject.optBoolean("Interact with specific Tweets", false);
+                                        Log.d(TAG, "✓ Interact with specific Tweets: " + specificTweets);
+
+                                        if (specificTweets && connectionObject.has("tweetUrls")) {
+                                            tweetsArray = connectionObject.optJSONArray("tweetUrls");
+                                            Log.d(TAG, "✓ Tweet URLs: " + tweetsArray);
+                                        }
+                                        if (specificTweets && connectionObject.has("numberOfTweets")) {
+                                            numberofTweets = connectionObject.optInt("numberOfTweets", 0);
+                                            Log.d(TAG, "✓ Number of specific tweets: " + numberofTweets);
+                                        }
+                                    }
                                 }
                             } else {
                                 Log.e(TAG, "TikTok key found but value is not an array");
@@ -363,18 +399,18 @@ public class TwitterAutomation {
             Log.d(TAG, "=== Final Twitter Toggle States ===");
             Log.d(TAG, "API Key Provided: " + API);
             Log.d(TAG, "OpenAI API Key: " + API_key);
-            Log.d(TAG, "Like the Tweets: " + likeTweet);
-            Log.d(TAG, "Probability of Liking the Tweets: " + probability_like);
-            Log.d(TAG, "Daily Limit of Liking Tweets: " + limit_like);
-            Log.d(TAG, "Date for Liking Tweets: " + dateLike);
-            Log.d(TAG, "Follow the users: " + followTweet);
-            Log.d(TAG, "Probability of Following the Users: " + probability_follow);
-            Log.d(TAG, "Daily Limit of Following Users: " + limit_follow);
-            Log.d(TAG, "Date for Following Users: " + dateFollow);
-            Log.d(TAG, "Comments on Tweets: " + commentsOnTweets);
-            Log.d(TAG, "Probability of Commenting on Tweets: " + probability_comment);
-            Log.d(TAG, "Daily Limit of Commenting on Tweets: " + limit_comment);
-            Log.d(TAG, "Date for Commenting on Tweets: " + dateComment);
+//            Log.d(TAG, "Like the Tweets: " + likeTweet);
+//            Log.d(TAG, "Probability of Liking the Tweets: " + probability_like);
+//            Log.d(TAG, "Daily Limit of Liking Tweets: " + limit_like);
+//            Log.d(TAG, "Date for Liking Tweets: " + dateLike);
+//            Log.d(TAG, "Follow the users: " + followTweet);
+//            Log.d(TAG, "Probability of Following the Users: " + probability_follow);
+//            Log.d(TAG, "Daily Limit of Following Users: " + limit_follow);
+//            Log.d(TAG, "Date for Following Users: " + dateFollow);
+//            Log.d(TAG, "Comments on Tweets: " + commentsOnTweets);
+//            Log.d(TAG, "Probability of Commenting on Tweets: " + probability_comment);
+//            Log.d(TAG, "Daily Limit of Commenting on Tweets: " + limit_comment);
+//            Log.d(TAG, "Date for Commenting on Tweets: " + dateComment);
             Log.d(TAG, "Interaction with profiles using usernames: " + userNameInteract);
             Log.d(TAG, "Posted Array: " + postedArray);
             Log.d(TAG, "Number of Profiles: " + numberofProfiles);
@@ -382,6 +418,12 @@ public class TwitterAutomation {
             Log.d(TAG, "Space URL: " + spaceLink);
             Log.d(TAG, "Post a new Tweet.: " + newPost);
             Log.d(TAG, "New Post Prompt: " + newPostPrompt);
+            Log.d(TAG, "Follow/Unfollow the Usernames: " + Follow_Unfollow);
+            Log.d(TAG, "Usernames: " + profile);
+            Log.d(TAG, "Type of Action: " + typeofAction);
+            Log.d(TAG, "Interact with specific Tweets: " + specificTweets);
+            Log.d(TAG, "Tweet URLs: " + tweetsArray);
+            Log.d(TAG, "Number of specific tweets: " + numberofTweets);
             Log.d(TAG, "Duration: " + duration);
             Log.d(TAG, "=====================================");
 
@@ -392,6 +434,8 @@ public class TwitterAutomation {
             this.UserNameInteract = new InteractionWithUsernames(service, Task_id, job_id, AccountInputs, duration, postedArray, numberofProfiles, API_key);
             this.joinspaces = new JoinSpaces(service, Task_id, job_id, AccountInputs, duration, spaceLink);
             this.postTweet = new PostTweet(service, Task_id, job_id, AccountInputs, duration, newPostPrompt, API_key);
+            this.follow_unfollow = new Follow_Unfollow(service, Task_id, job_id, AccountInputs, duration, profile, typeofAction);
+            this.retweet = new Retweet(service, Task_id, job_id, AccountInputs, duration, tweetsArray, numberofTweets, API_key);
 //            // Route to the appropriate function based on toggle states
 //            if (API && likeTweet) {
 //                Log.d(TAG, "🎯 Routing to: Like Tweets Only");
@@ -453,6 +497,12 @@ public class TwitterAutomation {
         } else if (API && newPost) {
             Log.d(TAG, "🎯 Routing to: Post a new Tweet.");
             postTweet.startPostingAutomation();
+        } else if (API && Follow_Unfollow) {
+            Log.d(TAG, "🎯 Routing to: Follow/Unfollow the Usernames");
+            follow_unfollow.startFollow_unfollowAutomation();
+        } else if (API && specificTweets) {
+            Log.d(TAG, "🎯 Routing to: Interact with specific Tweets");
+            retweet.startRetweetAutomation();
         } else {
             Log.d(TAG, "🎯 No automation selected - Using default: ReelLiker");
             helperFunctions.cleanupAndExit("Doesn't find any automation", "error");
