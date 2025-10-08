@@ -44,8 +44,8 @@ public class TwitterAutomation {
     private int limit_like;
     private int limit_follow;
     private int limit_comment;
+    private int limit_user;
     private int numberofProfiles;
-    private int numberofTweets;
     private boolean likeTweet;
     private boolean followTweet;
     private boolean commentsOnTweets;
@@ -365,19 +365,19 @@ public class TwitterAutomation {
                                             typeofAction = connectionObject.optString("followAction", "");
                                             Log.d(TAG, "✓ Type of Action: " + typeofAction);
                                         }
+                                        if (Follow_Unfollow && connectionObject.has("usersPerDay")) {
+                                            limit_user = connectionObject.optInt("usersPerDay", 0);
+                                            Log.d(TAG, "✓ Number of users per day: " + limit_user);
+                                        }
                                     }
 
                                     if (connectionObject.has("Interact with specific Tweets")) {
                                         specificTweets = connectionObject.optBoolean("Interact with specific Tweets", false);
                                         Log.d(TAG, "✓ Interact with specific Tweets: " + specificTweets);
 
-                                        if (specificTweets && connectionObject.has("tweetUrls")) {
-                                            tweetsArray = connectionObject.optJSONArray("tweetUrls");
-                                            Log.d(TAG, "✓ Tweet URLs: " + tweetsArray);
-                                        }
-                                        if (specificTweets && connectionObject.has("numberOfTweets")) {
-                                            numberofTweets = connectionObject.optInt("numberOfTweets", 0);
-                                            Log.d(TAG, "✓ Number of specific tweets: " + numberofTweets);
+                                        if (specificTweets && connectionObject.has("tweetData")) {
+                                            tweetsArray = connectionObject.optJSONArray("tweetData");
+                                            Log.d(TAG, "✓ Tweet Data: " + tweetsArray);
                                         }
                                     }
                                 }
@@ -421,9 +421,9 @@ public class TwitterAutomation {
             Log.d(TAG, "Follow/Unfollow the Usernames: " + Follow_Unfollow);
             Log.d(TAG, "Usernames: " + profile);
             Log.d(TAG, "Type of Action: " + typeofAction);
+            Log.d(TAG, "Number of users per day: " + limit_user);
             Log.d(TAG, "Interact with specific Tweets: " + specificTweets);
             Log.d(TAG, "Tweet URLs: " + tweetsArray);
-            Log.d(TAG, "Number of specific tweets: " + numberofTweets);
             Log.d(TAG, "Duration: " + duration);
             Log.d(TAG, "=====================================");
 
@@ -434,8 +434,8 @@ public class TwitterAutomation {
             this.UserNameInteract = new InteractionWithUsernames(service, Task_id, job_id, AccountInputs, duration, postedArray, numberofProfiles, API_key);
             this.joinspaces = new JoinSpaces(service, Task_id, job_id, AccountInputs, duration, spaceLink);
             this.postTweet = new PostTweet(service, Task_id, job_id, AccountInputs, duration, newPostPrompt, API_key);
-            this.follow_unfollow = new Follow_Unfollow(service, Task_id, job_id, AccountInputs, duration, profile, typeofAction);
-            this.retweet = new Retweet(service, Task_id, job_id, AccountInputs, duration, tweetsArray, numberofTweets, API_key);
+            this.follow_unfollow = new Follow_Unfollow(service, Task_id, job_id, AccountInputs, duration, profile, typeofAction, limit_user);
+            this.retweet = new Retweet(service, Task_id, job_id, AccountInputs, duration, tweetsArray, API_key);
 //            // Route to the appropriate function based on toggle states
 //            if (API && likeTweet) {
 //                Log.d(TAG, "🎯 Routing to: Like Tweets Only");

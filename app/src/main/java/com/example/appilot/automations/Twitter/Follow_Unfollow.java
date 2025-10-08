@@ -1,9 +1,12 @@
 package com.example.appilot.automations.Twitter;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -11,11 +14,17 @@ import com.example.appilot.automations.PopUpHandlers.Instagram.PopUpHandler;
 import com.example.appilot.services.MyAccessibilityService;
 import com.example.appilot.utils.HelperFunctions;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class Follow_Unfollow {
     private static final String TAG = "TwitterAutomation";
+    private static final String PREFS_NAME = "TwitterAutomationPrefs";
+    private static final String PREF_DATE = "follow_unfollow_date";
+    private static final String PREF_COUNT = "follow_unfollow_count";
     private final Context context;
     private final Handler handler;
     private final Random random;
@@ -31,8 +40,10 @@ public class Follow_Unfollow {
     private int duration;
     private int currentUserIndex = 0;
     private long startTime;
+    private int MAX_COUNT;
+    private int COUNT = 0;
 
-    public Follow_Unfollow(MyAccessibilityService service, String taskid, String jobid, List<Object> AccountInputs, int duration, String profile, String typeOfAction) {
+    public Follow_Unfollow(MyAccessibilityService service, String taskid, String jobid, List<Object> AccountInputs, int duration, String profile, String typeOfAction, int limit_user) {
         this.context = service;
         this.service = service;
         this.Task_id = taskid;
@@ -46,9 +57,28 @@ public class Follow_Unfollow {
         this.startTime = System.currentTimeMillis();
         this.profile = profile;
         this.typeofAction = typeOfAction;
+        this.MAX_COUNT = limit_user;
     }
 
     public void startFollow_unfollowAutomation() {
+        // Daily limit check
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String storedDate = prefs.getString(PREF_DATE, null);
+        int storedCount = prefs.getInt(PREF_COUNT, 0);
+        String todaysDate = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
+        if (storedDate == null || !todaysDate.equals(storedDate)) {
+            // First run or new day: reset count and store today's date
+            prefs.edit().putString(PREF_DATE, todaysDate).putInt(PREF_COUNT, 0).apply();
+            COUNT = 0;
+            Log.d(TAG, "First run or new day: Resetting count and storing today's date: " + todaysDate);
+        } else {
+            COUNT = storedCount;
+            Log.d(TAG, "Loaded stored date: " + storedDate + ", Today's date: " + todaysDate + ", Count: " + COUNT);
+            if (COUNT >= MAX_COUNT) {
+                helperFunctions.cleanupAndExit("Daily follow/unfollow limit reached: " + COUNT + "/" + MAX_COUNT, "final");
+                return;
+            }
+        }
         parseUsernames(profile);
         if (!hasCurrentUser()) {
             helperFunctions.cleanupAndExit("No usernames present. Exiting activity.", "final");
@@ -184,6 +214,46 @@ public class Follow_Unfollow {
             }
         }, 300);
     }
+//    private void selectProfile() {
+//        Log.d(TAG, "Starting hierarchy navigation to click target element for profile...");
+//        AccessibilityNodeInfo rootNode = service.getRootInActiveWindow();
+//        if (rootNode == null) {
+//            Log.e(TAG, "No root node available");
+//            helperFunctions.cleanupAndExit("Automation Could not be Completed, because no Root_node present in selectProfile", "error");
+//            return;
+//        }
+//        String parentNodeId = "com.twitter.android:id/search_suggestions_list";
+//        AccessibilityNodeInfo parentNode = HelperFunctions.findNodeByResourceId(rootNode, parentNodeId);
+//
+//        if (parentNode != null) {
+//            Log.d(TAG, "Found parent node with ID: " + parentNodeId);
+//            Log.d(TAG, "Parent has " + parentNode.getChildCount() + " children");
+//            // Navigate to target: Parent -> Child(0)
+//            AccessibilityNodeInfo targetElement = navigateToProfile(parentNode, 0);
+//            if (targetElement != null) {
+//                Log.d(TAG, "Found target element, attempting click...");
+//                boolean clickSuccess = performClick(targetElement);
+//                if (clickSuccess) {
+//                    Log.d(TAG, "Profile clicked successfully. Waiting for profile to load...");
+//                    Log.d(TAG, "Action to perform is " + typeofAction + " the users.");
+//                    if (typeofAction.equals("Follow")) {
+//                        int randomDelay = 5000 + random.nextInt(5000);
+//                        handler.postDelayed(this::findAndClickFollowButton,randomDelay);
+//                    } else if (typeofAction.equals("Unfollow")) {
+//                        handler.postDelayed(this::findAndClickFollowing,5000 + random.nextInt(5000));
+//                    }
+//                }
+//            } else {
+//                Log.e(TAG, "Could not navigate to target element");
+//                helperFunctions.cleanupAndExit("Could not navigate to target element", "error");
+//            }
+//            parentNode.recycle();
+//        } else {
+//            Log.e(TAG, "Could not find parent node with ID: " + parentNodeId);
+//            helperFunctions.cleanupAndExit("Could not find parent node with ID: " + parentNodeId, "error");
+//        }
+//        rootNode.recycle();
+//    }
     private void selectProfile() {
         Log.d(TAG, "Starting hierarchy navigation to click target element for profile...");
         AccessibilityNodeInfo rootNode = service.getRootInActiveWindow();
@@ -201,21 +271,36 @@ public class Follow_Unfollow {
             // Navigate to target: Parent -> Child(0)
             AccessibilityNodeInfo targetElement = navigateToProfile(parentNode, 0);
             if (targetElement != null) {
-                Log.d(TAG, "Found target element, attempting click...");
-                boolean clickSuccess = performClick(targetElement);
-                if (clickSuccess) {
-                    Log.d(TAG, "Profile clicked successfully. Waiting for profile to load...");
-                    Log.d(TAG, "Action to perform is " + typeofAction + " the users.");
-                    if (typeofAction.equals("Follow")) {
-                        int randomDelay = 5000 + random.nextInt(5000);
-                        handler.postDelayed(this::findAndClickFollowButton,randomDelay);
-                    } else if (typeofAction.equals("Unfollow")) {
-                        handler.postDelayed(this::findAndClickFollowing,5000 + random.nextInt(5000));
+                Log.d(TAG, "Found target element, matching Username...");
+                AccessibilityNodeInfo screenNameNode = HelperFunctions.findNodeByResourceId(targetElement, "com.twitter.android:id/screenname_item");
+                String foundScreenName = (screenNameNode != null && screenNameNode.getText() != null) ? screenNameNode.getText().toString().trim() : "";
+                Log.d(TAG, "Found screen name: " + foundScreenName + ", looking for: " + currentUsername());
+                if (foundScreenName.equalsIgnoreCase(currentUsername())) {
+                    Log.d(TAG, "Screen name matches, attempting click...");
+                    boolean clickSuccess = performClick(targetElement);
+                    targetElement.recycle();
+                    if (clickSuccess) {
+                        Log.d(TAG, "Profile clicked successfully. Waiting for profile to load...");
+                        Log.d(TAG, "Action to perform is " + typeofAction + " the users.");
+                        if (typeofAction.equals("Follow")) {
+                            int randomDelay = 5000 + random.nextInt(5000);
+                            handler.postDelayed(this::findAndClickFollowButton,randomDelay);
+                        } else if (typeofAction.equals("Unfollow")) {
+                            handler.postDelayed(this::findAndClickFollowing,5000 + random.nextInt(5000));
+                        }
                     }
+                } else {
+                    Log.e(TAG, "Screen name does not match. Expected: " + currentUsername() + ", Found: " + foundScreenName);
+                    targetElement.recycle();
+                    handler.postDelayed(()->{
+                        launchProfileByIntent(currentUsername());
+                    },2000 + random.nextInt(3000));
                 }
             } else {
-                Log.e(TAG, "Could not navigate to target element");
-                helperFunctions.cleanupAndExit("Could not navigate to target element", "error");
+                Log.e(TAG, "Could not find the specific profile in search results");
+                handler.postDelayed(()->{
+                    launchProfileByIntent(currentUsername());
+                },2000 + random.nextInt(3000));
             }
             parentNode.recycle();
         } else {
@@ -223,6 +308,38 @@ public class Follow_Unfollow {
             helperFunctions.cleanupAndExit("Could not find parent node with ID: " + parentNodeId, "error");
         }
         rootNode.recycle();
+    }
+    private void launchProfileByIntent(String username) {
+        Log.d(TAG, "Attempting to launch profile by intent for username: " + username);
+        if (username == null || username.isEmpty()) {
+            Log.e(TAG, "Username is null or empty. Cannot launch intent.");
+            return;
+        }
+        String cleanUsername = username.startsWith("@") ? username.substring(1) : username;
+        String twitterUrl = "twitter://user?screen_name=" + cleanUsername;
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(twitterUrl));
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            Log.d(TAG, "Trying to open Twitter app with URL: " + twitterUrl);
+            context.startActivity(intent);
+            Log.d(TAG, "Twitter app intent launched successfully.");
+        } catch (android.content.ActivityNotFoundException e) {
+            Log.w(TAG, "Twitter app not found. Falling back to browser.");
+            String webUrl = "https://twitter.com/" + username;
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUrl));
+            browserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            try {
+                context.startActivity(browserIntent);
+                Log.d(TAG, "Browser intent launched successfully with URL: " + webUrl);
+                int delay = 5000 + random.nextInt(5000);
+                Log.d(TAG, "Scheduling findAndClickFollowButton after " + delay + " ms");
+                handler.postDelayed(this::findAndClickFollowButton, delay);
+            } catch (Exception ex) {
+                Log.e(TAG, "Failed to launch browser intent: " + ex.getMessage());
+                Log.d(TAG, "Moving to next username if available.");
+                handler.postDelayed(this::switchToNextUsername, 2000+ random.nextInt(3000));
+            }
+        }
     }
     private void findAndClickFollowButton() {
         Log.d(TAG, "Searching for Follow button...");
@@ -239,20 +356,21 @@ public class Follow_Unfollow {
             boolean clickSuccess = performClick(searchFollow);
             if (clickSuccess) {
                 Log.d(TAG, "Follow Button clicked...");
-                int randomDelay = 2000 + random.nextInt(5000);
-                handler.postDelayed(()->{
-                    try {
-                        helperFunctions.performScroll(0.7f, 0.3f);
-                        handler.postDelayed(()->{
-                            Log.d(TAG, "Clicked Follow button, Moving to next user...");
-                            switchToNextUsername();
-                        },randomDelay);
-
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error in findTweetNode1: " + e.getMessage());
-                        helperFunctions.cleanupAndExit("Error in findTweetNode1: " + e.getMessage(), "error");
-                    }
-                },randomDelay);
+                incrementAndStoreCount();
+//                int randomDelay = 2000 + random.nextInt(5000);
+//                handler.postDelayed(()->{
+//                    try {
+//                        helperFunctions.performScroll(0.7f, 0.3f);
+//                        handler.postDelayed(()->{
+//                            Log.d(TAG, "Clicked Follow button, Moving to next user...");
+//                            switchToNextUsername();
+//                        },randomDelay);
+//
+//                    } catch (Exception e) {
+//                        Log.e(TAG, "Error in findTweetNode1: " + e.getMessage());
+//                        helperFunctions.cleanupAndExit("Error in findTweetNode1: " + e.getMessage(), "error");
+//                    }
+//                },randomDelay);
             }
         } else {
             Log.d(TAG, "Follow button not found");
@@ -316,8 +434,9 @@ public class Follow_Unfollow {
             boolean clickSuccess = performClick(searchBar);
             if (clickSuccess) {
                 Log.d(TAG, "Unfollow Button clicked. Switcing to next profile...");
-                int randomDelay = 3000 + random.nextInt(5000);
-                handler.postDelayed(this::switchToNextUsername, randomDelay);
+                incrementAndStoreCount();
+//                int randomDelay = 3000 + random.nextInt(5000);
+//                handler.postDelayed(this::switchToNextUsername, randomDelay);
             }
         } else {
             Log.d(TAG, "Unfollow button not found");
@@ -570,6 +689,20 @@ public class Follow_Unfollow {
     private String currentUsername() {
         return hasCurrentUser() ? usernames.get(currentUserIndex) : null;
     }
-
-
+    // Call this after each follow/unfollow action
+    private void incrementAndStoreCount() {
+        COUNT++;
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putInt(PREF_COUNT, COUNT).apply();
+        Log.d(TAG, "Incremented and stored count: " + COUNT);
+        if (COUNT >= MAX_COUNT) {
+            handler.postDelayed(()->{
+                helperFunctions.cleanupAndExit("Daily follow/unfollow limit reached: " + COUNT + "/" + MAX_COUNT, "final");
+            }, 3000+ random.nextInt(5000));
+        }
+        else {
+            int randomDelay = 3000 + random.nextInt(5000);
+            handler.postDelayed(this::switchToNextUsername, randomDelay);
+        }
+    }
 }

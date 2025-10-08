@@ -37,11 +37,14 @@ public class Retweet {
     private int Max_Retry = 3;
     private int retryCount = 0;
     private int prompt = 0;
-    private int numberofProfiles;
     private long startTime;
     private int currentUrlIndex = 0;
+    private boolean like;
+    private boolean repost;
+    private boolean comment;
+    private boolean quote;
 
-    public Retweet(MyAccessibilityService service, String taskid, String jobid, List<Object> AccountInputs, int duration, JSONArray inputArray, int numOfProfiles, String openAPIKey){
+    public Retweet(MyAccessibilityService service, String taskid, String jobid, List<Object> AccountInputs, int duration, JSONArray inputArray, String openAPIKey){
         this.context = service;
         this.service = service;
         this.Task_id = taskid;
@@ -54,12 +57,10 @@ public class Retweet {
         this.startTime = System.currentTimeMillis();
         this.openAPIKey = openAPIKey;
         this.userArray = inputArray;
-        this.numberofProfiles = numOfProfiles;
     }
     public void startRetweetAutomation(){
         Log.d(TAG, "Starting Twitter Retweet Automation");
         Log.d(TAG, "Input Array: " + userArray.toString());
-        Log.d(TAG, "Number of Profiles to use: " + numberofProfiles);
         processNextUrl();
     }
     private void processNextUrl() {
@@ -77,12 +78,23 @@ public class Retweet {
             return;
         }
         if (currentUrlIndex < userArray.length()) {
-            String url = userArray.optString(currentUrlIndex, null);
-            if (url != null && !url.isEmpty()) {
-                Log.d(TAG, "Launching URL at index " + currentUrlIndex + ": " + url);
-                launchIntent(url);
+            org.json.JSONObject obj = userArray.optJSONObject(currentUrlIndex);
+            if (obj != null) {
+                String url = obj.optString("url", null);
+                like = obj.optBoolean("like", false);
+                repost = obj.optBoolean("repost", false);
+                comment = obj.optBoolean("comment", false);
+                quote = obj.optBoolean("quote", false);
+                if (url != null && !url.isEmpty()) {
+                    Log.d(TAG, "Launching URL at index " + currentUrlIndex + ": " + url);
+                    launchIntent(url);
+                } else {
+                    Log.e(TAG, "URL at index " + currentUrlIndex + " is null or empty, skipping.");
+                    currentUrlIndex++;
+                    processNextUrl();
+                }
             } else {
-                Log.e(TAG, "URL at index " + currentUrlIndex + " is null or empty, skipping.");
+                Log.e(TAG, "JSONObject at index " + currentUrlIndex + " is null, skipping.");
                 currentUrlIndex++;
                 processNextUrl();
             }
@@ -151,6 +163,18 @@ public class Retweet {
         rootNode.recycle();
     }
     private void findAndClickLike() {
+        if (!like) {
+            Log.d(TAG, "Like action not required, moving to Repost if needed");
+            handler.postDelayed(()->{
+                try{
+                    findAndClickRepost();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error in findAndClickRepost: " + e.getMessage());
+                    helperFunctions.cleanupAndExit("Error in findAndClickRepost: " + e.getMessage(), "error");
+                }
+            },2000+random.nextInt(3000));
+            return;
+        }
         Log.d(TAG, "Searching for Like Button");
         AccessibilityNodeInfo rootNode = service.getRootInActiveWindow();
         if (rootNode == null) {
@@ -187,6 +211,18 @@ public class Retweet {
         rootNode.recycle();
     }
     private void findAndClickRepost() {
+        if (!repost && !quote) {
+            Log.d(TAG, "Repost/Quote action not required, moving to Comment if needed");
+            if (comment && tweetText != null) {
+                handler.postDelayed(() -> {
+                    findAndClickComment(tweetText);
+                }, 2000 + random.nextInt(3000));
+            } else {
+                currentUrlIndex ++;
+                handler.postDelayed(this::processNextUrl, 5000+ random.nextInt(5000));
+            }
+            return;
+        }
         Log.d(TAG, "Searching for Repost Button");
         AccessibilityNodeInfo rootNode = service.getRootInActiveWindow();
         if (rootNode == null) {
@@ -233,13 +269,45 @@ public class Retweet {
         }
         String parentNodeId = "com.twitter.android:id/action_sheet_recycler_view";
         AccessibilityNodeInfo parentNode = HelperFunctions.findNodeByResourceId(rootNode, parentNodeId);
-        int childIndex = 1;
         if (parentNode != null){
+            if (quote) {
+                int childIndex = 1;
                 Log.d(TAG, "Attempting to click Quote");
                 handler.postDelayed(()->{
                     clickQuoteInPopup(parentNode, childIndex);
                 }, 2000+ random.nextInt(3000));
+            } else if (repost) {
+                int childIndex = 0;
+                Log.d(TAG, "Attempting to click Repost");
+                handler.postDelayed(()->{
+                    clickRepostInPopup(parentNode, childIndex);
+                }, 2000+ random.nextInt(3000));
+            }
         }
+    }
+    private void clickRepostInPopup(AccessibilityNodeInfo parentNode, int childIndex){
+        AccessibilityNodeInfo targetElement = navigateToProfile(parentNode, childIndex);
+        if (targetElement != null) {
+            Log.d(TAG, "Found target element, attempting click...");
+            boolean clickSuccess = performClick(targetElement);
+            targetElement.recycle();
+            if (clickSuccess) {
+                Log.d(TAG, "Repost clicked successfully. Extracting tweet content and calling comment...");
+                int randomDelay = 2000 + random.nextInt(3000);
+                if (tweetText != null) {
+                    handler.postDelayed(() -> {
+                        findAndClickComment(tweetText);
+                    }, randomDelay);
+                } else {
+                    currentUrlIndex ++;
+                    handler.postDelayed(this::processNextUrl, 5000+ random.nextInt(5000));
+                }
+            }
+        } else {
+            Log.e(TAG, "Click on target element failed");
+            helperFunctions.cleanupAndExit("Click on target element failed", "error");
+        }
+        parentNode.recycle();
     }
     private void clickQuoteInPopup(AccessibilityNodeInfo parentNode, int childIndex){
         AccessibilityNodeInfo targetElement = navigateToProfile(parentNode, childIndex);
@@ -294,6 +362,12 @@ public class Retweet {
         rootNode.recycle();
     }
     private void findAndClickComment(String text) {
+        if (!comment) {
+            Log.d(TAG, "Comment action not required, moving to next URL if available");
+            currentUrlIndex ++;
+            handler.postDelayed(this::processNextUrl, 5000+random.nextInt(5000));
+            return;
+        }
         Log.d(TAG, "Searching for Comment Button");
         AccessibilityNodeInfo rootNode = service.getRootInActiveWindow();
         if (rootNode == null) {
@@ -384,12 +458,12 @@ public class Retweet {
                 @Override
                 public void onError(String error) {
                     Log.e(TAG, "OpenAI error: " + error);
-                    handler.post(() -> typeTextLikeHuman("Great post!"));
+                    helperFunctions.cleanupAndExit("Failed to get response from OpenAI", "error");
                 }
             });
         } else {
             Log.d(TAG, "No OpenAI key, using fallback comment");
-            typeTextLikeHuman("Interesting Tweet!");
+            helperFunctions.cleanupAndExit("No OpenAI key provided, cannot generate comment", "error");
         }
     }
     // Types the given text in the comment field, character by character
