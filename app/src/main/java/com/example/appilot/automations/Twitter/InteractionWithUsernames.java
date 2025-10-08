@@ -457,14 +457,7 @@ public class InteractionWithUsernames {
             boolean clickSuccess = performClick(likeButton);
             if (clickSuccess) {
                 like_count ++;
-                handler.postDelayed(()->{
-                    try{
-                        findAndClickRepost();
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error in findAndClickRepost: " + e.getMessage());
-                        helperFunctions.cleanupAndExit("Error in findAndClickRepost: " + e.getMessage(), "error");
-                    }
-                },2000+random.nextInt(3000));
+                handler.postDelayed(this::findAndClickRepost,2000+random.nextInt(3000));
             }
         } else {
             Log.d(TAG, "Like Button is not found");
@@ -490,6 +483,7 @@ public class InteractionWithUsernames {
                 return;
             } else {
                 handler.postDelayed(this::onScroll,2000+random.nextInt(3000));
+                return;
             }
         }
         Log.d(TAG, "Searching for Repost Button");

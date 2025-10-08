@@ -99,9 +99,9 @@ public class Retweet {
                 processNextUrl();
             }
         } else {
-            Log.d(TAG, "No new URL present");
+            Log.d(TAG, "No new URL present in the List, Exiting...");
             handler.postDelayed(()->{
-                helperFunctions.cleanupAndExit("no new URL present", "final");
+                helperFunctions.cleanupAndExit("All URLs in the list are done. Exiting...", "final");
             }, 2000+ random.nextInt(3000));
         }
     }
