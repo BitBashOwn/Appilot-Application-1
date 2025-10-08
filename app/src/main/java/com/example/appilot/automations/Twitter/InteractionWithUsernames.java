@@ -286,20 +286,6 @@ public class InteractionWithUsernames {
                         launchProfileByIntent(currentUsername());
                     },2000 + random.nextInt(3000));
                 }
-//                boolean clickSuccess = performClick(targetElement);
-//                if (clickSuccess) {
-//                    Log.d(TAG, "Profile clicked successfully. Waiting for profile to load...");
-//                    int randomDelay = 2000 + random.nextInt(3000);
-//                    //handler.postDelayed(this::findAndClickFollowButton, randomDelay);
-//                    handler.postDelayed(()->{
-//                        try {
-//                            findAndClickFollowButton();
-//                        } catch (Exception e) {
-//                            Log.e(TAG, "Error in findAndClickFollowButton: " + e.getMessage());
-//                            helperFunctions.cleanupAndExit("Error in findAndClickFollowButton: " + e.getMessage(), "error");
-//                        }
-//                    },randomDelay);
-//                }
             } else {
                 Log.e(TAG, "Could not find the specific profile in search results");
                 handler.postDelayed(()->{
@@ -753,12 +739,12 @@ public class InteractionWithUsernames {
                 @Override
                 public void onError(String error) {
                     Log.e(TAG, "OpenAI error: " + error);
-                    handler.post(() -> typeTextLikeHuman("Great post!"));
+                    helperFunctions.cleanupAndExit("Failed to get response from OpenAI", "error");
                 }
             });
         } else {
             Log.d(TAG, "No OpenAI key, using fallback comment");
-            typeTextLikeHuman("Nice tweet!");
+            helperFunctions.cleanupAndExit("OpenAI API key is missing. Cannot generate comment.", "error");
         }
     }
     // Types the given text in the comment field, character by character
