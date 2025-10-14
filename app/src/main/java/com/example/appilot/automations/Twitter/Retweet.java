@@ -31,6 +31,8 @@ public class Retweet {
     private String openAPIKey;
     private String commentType = "Natural reply";
     private String tweetText;
+    private String url;
+    private String promptText;
     private JSONArray userArray;
     private List<Object> AccountInputs;
     private int duration;
@@ -80,13 +82,15 @@ public class Retweet {
         if (currentUrlIndex < userArray.length()) {
             org.json.JSONObject obj = userArray.optJSONObject(currentUrlIndex);
             if (obj != null) {
-                String url = obj.optString("url", null);
+                url = obj.optString("url", null);
                 like = obj.optBoolean("like", false);
                 repost = obj.optBoolean("repost", false);
                 comment = obj.optBoolean("comment", false);
                 quote = obj.optBoolean("quote", false);
+                promptText = obj.optString("commentPrompt", "Natural reply");
                 if (url != null && !url.isEmpty()) {
                     Log.d(TAG, "Launching URL at index " + currentUrlIndex + ": " + url);
+                    Log.d(TAG, "Actions - Like: " + like + ", Repost: " + repost + ", Comment: " + comment + ", Quote: " + quote + ", Prompt: " + promptText);
                     launchIntent(url);
                 } else {
                     Log.e(TAG, "URL at index " + currentUrlIndex + " is null or empty, skipping.");
@@ -124,10 +128,12 @@ public class Retweet {
             helperFunctions.cleanupAndExit("Automation Could not be Completed, because no Root_node present in findTweetNode", "error");
             return;
         }
-        String searchFollowButton = "com.twitter.android:id/tweet_auto_playable_content_parent";
+        tweetText=extractTweetText();
+        //String searchFollowButton = "com.twitter.android:id/tweet_auto_playable_content_parent";
+        String searchFollowButton = "com.twitter.android:id/tweet_inline_actions";
         AccessibilityNodeInfo searchFollow = HelperFunctions.findNodeByResourceId(rootNode, searchFollowButton);
         if (searchFollow != null) {
-            tweetText=extractTweetText();
+            //tweetText=extractTweetText();
             Log.d(TAG, "Extracted Tweet Text: "+tweetText);
             Log.d(TAG, "Find the Tweet Node, proceeding to click like...");
             handler.postDelayed(()->{
@@ -213,7 +219,7 @@ public class Retweet {
     private void findAndClickRepost() {
         if (!repost && !quote) {
             Log.d(TAG, "Repost/Quote action not required, moving to Comment if needed");
-            if (comment && tweetText != null) {
+            if (comment && promptText != null) {
                 handler.postDelayed(() -> {
                     findAndClickComment(tweetText);
                 }, 2000 + random.nextInt(3000));
@@ -248,7 +254,7 @@ public class Retweet {
             }
         } else {
             Log.d(TAG, "Repost Button is not found");
-            if (tweetText != null) {
+            if (promptText != null || tweetText != null) {
                 handler.postDelayed(() -> {
                     findAndClickComment(tweetText);
                 }, 2000 + random.nextInt(3000));
@@ -294,7 +300,7 @@ public class Retweet {
             if (clickSuccess) {
                 Log.d(TAG, "Repost clicked successfully. Extracting tweet content and calling comment...");
                 int randomDelay = 2000 + random.nextInt(3000);
-                if (tweetText != null) {
+                if (promptText != null || tweetText != null) {
                     handler.postDelayed(() -> {
                         findAndClickComment(tweetText);
                     }, randomDelay);
@@ -343,7 +349,7 @@ public class Retweet {
             Log.d(TAG, "Found Repost Button in Quote, attempting click");
             boolean clickSuccess = performClick(repost2Button);
             if (clickSuccess) {
-                if (tweetText != null) {
+                if (promptText != null || tweetText != null) {
                     int randomDelay = 2000 + random.nextInt(3000);
                     handler.postDelayed(() -> {
                         findAndClickComment(tweetText);
@@ -425,10 +431,13 @@ public class Retweet {
                 Log.d(TAG, "Found target element, attempting click...");
                 boolean clickSuccess = performClick(targetElement);
                 if (clickSuccess) {
-                    // Move to next element in the list after successful click
-                    int randomDelay = 5000 + random.nextInt(5000);
-                    currentUrlIndex ++;
-                    handler.postDelayed(this::processNextUrl,randomDelay);
+                    handler.postDelayed(()->{
+                        // Move to next element in the list after successful click
+                        service.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK);
+                        int randomDelay = 5000 + random.nextInt(5000);
+                        currentUrlIndex ++;
+                        handler.postDelayed(this::processNextUrl,randomDelay);
+                    }, 3000);
                 }
             } else {
                 Log.e(TAG, "Could not navigate to target element");
@@ -441,26 +450,42 @@ public class Retweet {
         }
     }
     private void sendTextToOpenAIAndType(String tweetText) {
-        if (tweetText == null || tweetText.isEmpty()) {
+        if ((tweetText == null || tweetText.isEmpty()) && (promptText == null || promptText.isEmpty())){
             Log.d(TAG, "No tweet text to send to OpenAI, using default comment");
             typeTextLikeHuman("Interesting tweet!");
             return;
         }
         // Use OpenAIClient if available, else fallback
         if (openAPIKey != null && !openAPIKey.isEmpty()) {
-            OpenAIClient openAIClient = new OpenAIClient(openAPIKey);
-            openAIClient.generateComment(tweetText, commentType, prompt, new OpenAIClient.OpenAICallback() {
-                @Override
-                public void onSuccess(String generatedComment) {
-                    Log.d(TAG, "OpenAI generated comment: " + generatedComment);
-                    handler.post(() -> typeTextLikeHuman(generatedComment));
-                }
-                @Override
-                public void onError(String error) {
-                    Log.e(TAG, "OpenAI error: " + error);
-                    helperFunctions.cleanupAndExit("Failed to get response from OpenAI", "error");
-                }
-            });
+            if (prompt == 1) {
+                OpenAIClient openAIClient = new OpenAIClient(openAPIKey);
+                openAIClient.generateCommentForRetweet(tweetText, prompt, promptText, new OpenAIClient.OpenAICallback() {
+                    @Override
+                    public void onSuccess(String generatedComment) {
+                        Log.d(TAG, "OpenAI generated comment: " + generatedComment);
+                        handler.post(() -> typeTextLikeHuman(generatedComment));
+                    }
+                    @Override
+                    public void onError(String error) {
+                        Log.e(TAG, "OpenAI error: " + error);
+                        helperFunctions.cleanupAndExit("Failed to get response from OpenAI", "error");
+                    }
+                });
+            } else if (prompt == 2) {
+                OpenAIClient openAIClient = new OpenAIClient(openAPIKey);
+                openAIClient.generateComment(tweetText, commentType, prompt, new OpenAIClient.OpenAICallback() {
+                    @Override
+                    public void onSuccess(String generatedComment) {
+                        Log.d(TAG, "OpenAI generated comment: " + generatedComment);
+                        handler.post(() -> typeTextLikeHuman(generatedComment));
+                    }
+                    @Override
+                    public void onError(String error) {
+                        Log.e(TAG, "OpenAI error: " + error);
+                        helperFunctions.cleanupAndExit("Failed to get response from OpenAI", "error");
+                    }
+                });
+            }
         } else {
             Log.d(TAG, "No OpenAI key, using fallback comment");
             helperFunctions.cleanupAndExit("No OpenAI key provided, cannot generate comment", "error");
@@ -818,7 +843,7 @@ public class Retweet {
             Log.e(TAG, "No root node available");
             return null;
         }
-        String parentNodeId = "com.twitter.android:id/tweet_content_text";
+        String parentNodeId = "com.twitter.android:id/tweet_content_view_stub";
         AccessibilityNodeInfo parentNode = HelperFunctions.findNodeByResourceId(rootNode, parentNodeId);
 
         String tweet_Text = null;

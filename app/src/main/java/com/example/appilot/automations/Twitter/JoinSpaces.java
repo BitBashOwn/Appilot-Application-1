@@ -122,14 +122,14 @@ public class JoinSpaces {
                 Log.d(TAG, "Leave button clicked. Waiting to exit space...");
                 handler.postDelayed(()->{
                     helperFunctions.performScroll(0.8f, 0.3f);
-                    handler.postDelayed(()->{helperFunctions.cleanupAndExit("Leave the space, now exiting...", "final");},2000);
+                    handler.postDelayed(()->{helperFunctions.cleanupAndExit("Duration Completed, Exiting the space...", "final");},2000);
                 },2000+ random.nextInt(3000));
             }
         } else {
             Log.d(TAG, "Leave button not found");
             int randomDelay = 2000 + random.nextInt(3000);
             handler.postDelayed(() -> {
-                helperFunctions.cleanupAndExit("Leave button not found, Means the space has been ended", "error");
+                helperFunctions.cleanupAndExit("Leave button not found, Means the space has been ended", "final");
             }, randomDelay);
         }
         rootNode.recycle();

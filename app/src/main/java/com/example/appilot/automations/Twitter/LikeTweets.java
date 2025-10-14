@@ -39,7 +39,7 @@ public class LikeTweets {
     private static final String PREF_LIKE_COUNT = "likeCount";
     private static final String PREF_DATE = "dateLike";
 
-    public LikeTweets(MyAccessibilityService service, String taskid, String jobid, List<Object> AccountInputs, int duration, double probabilty, int like_Limit, String date) {
+    public LikeTweets(MyAccessibilityService service, String taskid, String jobid, List<Object> AccountInputs, int duration, double probability, int like_Limit, String date) {
         this.context = service;
         this.service = service;
         this.Task_id = taskid;
@@ -51,7 +51,7 @@ public class LikeTweets {
         this.AccountInputs = AccountInputs;
         this.duration = duration;
         this.startTime = System.currentTimeMillis();
-        this.likeProbability = probabilty;
+        this.likeProbability = probability;
         this.like_Limit = like_Limit;
         this.todaysDate = date;
         // Load likeCount from SharedPreferences
@@ -102,7 +102,8 @@ public class LikeTweets {
         }
         Log.d(TAG, "Root node available, proceeding with decision logic");
 
-        double randomValue = random.nextDouble();
+        //double randomValue = random.nextDouble();
+        double randomValue = Math.round(random.nextDouble() * 100.0) / 100.0;
         Log.d(TAG,"Random Value: "+randomValue+", Profile view probability: "+likeProbability);
         if (randomValue < likeProbability) {
             Log.d(TAG, "Clicking Like based on probability ("+(likeProbability*100)+ "%)");
@@ -156,7 +157,6 @@ public class LikeTweets {
                 float endY = 0.0f + random.nextFloat() * (0.7f);
                 float startY = endY + 0.3f;
                 helperFunctions.performScroll(startY, endY);
-
                 handler.postDelayed(this::findAndClickLikeButton, 1000);
             }, randomDelay);
         } else {

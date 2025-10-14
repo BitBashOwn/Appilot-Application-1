@@ -161,7 +161,7 @@ public class WebSocketClientManager {
 
         // Try alternate URL formats if the primary one keeps failing
         String wsUrl = "ws://server.appilot.app/ws/" + deviceCode;
-        //String wsUrl = "ws://192.168.1.121:8000/ws/" + deviceCode;
+        //String wsUrl = "ws://192.168.1.215:8000/ws/" + deviceCode;
         Log.d(TAG, "Using WebSocket URL: " + wsUrl);
 
         Request request = new Request.Builder().url(wsUrl).build();

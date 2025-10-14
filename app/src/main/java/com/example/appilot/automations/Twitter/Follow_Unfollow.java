@@ -299,7 +299,8 @@ public class Follow_Unfollow {
             } else {
                 Log.e(TAG, "Could not find the specific profile in search results");
                 handler.postDelayed(()->{
-                    launchProfileByIntent(currentUsername());
+                    //launchProfileByIntent(currentUsername());
+                    switchToNextUsername();
                 },2000 + random.nextInt(3000));
             }
             parentNode.recycle();

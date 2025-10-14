@@ -118,6 +118,7 @@ public class PostTweet {
             public void onError(String error) {
                 Log.e(TAG, "OpenAI error: " + error);
                 helperFunctions.cleanupAndExit("Failed to get response from OpenAI", "error");
+                //handler.post(() -> typeTweetLikeHuman("Good Morning! Fellas, Wishing you all a productive day ahead! #MorningMotivation"));
             }
         });
     }
